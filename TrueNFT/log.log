@@ -1,0 +1,17 @@
+Config: default
+Input arguments:
+     tvc: NftRootBase.tvc
+      wc: None
+    keys: NftRootBase.keys.json
+init_data: None
+is_update_tvc: None
+
+Seed phrase: "check wisdom square degree cradle winner weather wreck meat crouch crime fancy"
+Raw address: 0:98b9ae173a5750618d63ba1f0d079a874fb8c1631e74eda016902fbec9736986
+testnet:
+Non-bounceable address (for init): 0QCYua4XOldQYY1juh8NB5qHT7jBYx507aAWkC--yXNphnlW
+Bounceable address (for later access): kQCYua4XOldQYY1juh8NB5qHT7jBYx507aAWkC--yXNphiST
+mainnet:
+Non-bounceable address (for init): UQCYua4XOldQYY1juh8NB5qHT7jBYx507aAWkC--yXNphsLc
+Bounceable address (for later access): EQCYua4XOldQYY1juh8NB5qHT7jBYx507aAWkC--yXNphp8Z
+Succeeded

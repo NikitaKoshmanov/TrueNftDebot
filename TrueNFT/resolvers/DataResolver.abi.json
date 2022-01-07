@@ -1,0 +1,35 @@
+{
+	"ABI version": 2,
+	"header": ["time", "expire"],
+	"functions": [
+		{
+			"name": "resolveCodeHashData",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"codeHashData","type":"uint256"}
+			]
+		},
+		{
+			"name": "resolveData",
+			"inputs": [
+				{"name":"addrRoot","type":"address"},
+				{"name":"id","type":"uint256"}
+			],
+			"outputs": [
+				{"name":"addrData","type":"address"}
+			]
+		},
+		{
+			"name": "constructor",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		}
+	],
+	"data": [
+	],
+	"events": [
+	]
+}
