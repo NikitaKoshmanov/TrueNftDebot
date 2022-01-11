@@ -33,7 +33,7 @@ interface IMultisig {
 struct NftMintParams {
     int8 wid;
     string name;
-    string descriprion;
+    string description;
     uint256 contentHash;
     string mimeType;
     uint8 chunks;
@@ -74,10 +74,10 @@ contract NftDebot is Debot, Upgradable {
     }
 
     function start() public override {
-        mainMenu(0);
+        mainMenu();
     }
 
-    function mainMenu(uint32 index) public {
+    function mainMenu() public {
         if(_addrMultisig == address(0)) {
             Terminal.print(0, 'Looks like you do not have attached Multi-Signature Wallet.');
             attachMultisig();
@@ -108,7 +108,7 @@ contract NftDebot is Debot, Upgradable {
         Sdk.getAccountType(tvm.functionId(deployNft), addr);
 	}
 
-    function checkAccountStatus(int8 acc_type) public returns (bool) {
+    function checkAccountStatus(int8 acc_type) public pure returns (bool) {
         if (acc_type == -1)  {
             return false;
         }
@@ -131,24 +131,44 @@ contract NftDebot is Debot, Upgradable {
         Menu.select("Choose what you want to do", "", _items);
     }
 
-    function nftParamsInput(uint32 index) public {
+    function nftParamsInput() public {
         tvm.accept();
         Terminal.input(tvm.functionId(nftParamsSetWid), "Enter NFT wid:", false);
         Terminal.input(tvm.functionId(nftParamsSetName), "Enter name:", false);
+        Terminal.input(tvm.functionId(nftParamsSetDescription), "Enter description:", false);
+        Terminal.input(tvm.functionId(nftParamsSetContentHash), "Enter contentHash:", false);
+        Terminal.input(tvm.functionId(nftParamsSetMimeType), "Enter mimeType:", false);
+        Terminal.input(tvm.functionId(nftParamsSetChunks), "Enter chunks:", false);
+        Terminal.input(tvm.functionId(nftParamsSetChunkSize), "Enter chunkSize:", false);
+        Terminal.input(tvm.functionId(nftParamsSetSize), "Enter size:", false);
+        Terminal.input(tvm.functionId(nftParamsSetMeta), "Enter meta:", false);
 
         this.deployNftStep1();
     }
 
     function nftParamsSetWid(int8 value) public { _nftParams.wid = value;}
     function nftParamsSetName(string value) public { _nftParams.name = value;}
+    function nftParamsSetDescription(string value) public { _nftParams.description = value;}
+    function nftParamsSetContentHash(uint256 value) public { _nftParams.contentHash = value;}
+    function nftParamsSetMimeType(string value) public { _nftParams.mimeType = value;}
+    function nftParamsSetChunks(uint8 value) public { _nftParams.chunks = value;}
+    function nftParamsSetChunkSize(uint128 value) public { _nftParams.chunkSize = value;}
+    function nftParamsSetSize(uint128 value) public { _nftParams.size = value;}
+    function nftParamsSetMeta(Meta value) public { _nftParams.meta = value;}
+
 
 
     function deployNftStep1() public {
         Terminal.print(0, "NFT Data");
         Terminal.print(0, format("NFT owner: {}\n", _addrMultisig));
         Terminal.print(0, format("NFT wid: {}\n", _nftParams.wid));
-        Terminal.print(0, format("Name: {}\n", _nftParams.name));
-        /*DESCRIPTION*/
+        Terminal.print(0, format("description: {}\n", _nftParams.description));
+        Terminal.print(0, format("contentHash: {}\n", _nftParams.contentHash));
+        Terminal.print(0, format("mimeType: {}\n", _nftParams.mimeType));
+        Terminal.print(0, format("chunks: {}\n", _nftParams.chunks));
+        Terminal.print(0, format("chunkSize: {}\n", _nftParams.chunkSize));
+        Terminal.print(0, format("size: {}\n", _nftParams.size));
+        //Terminal.print(0, format("meta: {}\n", _nftParams.meta));
         //resolveNftDataAddr();
         ConfirmInput.get(tvm.functionId(deployNftStep2), "Sign and mint NFT?");
     }
@@ -162,14 +182,13 @@ contract NftDebot is Debot, Upgradable {
         }
     }
 
-    function deployNftStep3() public {
+    function deployNftStep3() public view {
         optional(uint256) pubkey;
-
         TvmCell payload = tvm.encodeBody(
             NftRoot.mintNft,
             _nftParams.wid,
             _nftParams.name,
-            _nftParams.descriprion,
+            _nftParams.description,
             _nftParams.contentHash,
             _nftParams.mimeType,
             _nftParams.chunks,
@@ -188,7 +207,6 @@ contract NftDebot is Debot, Upgradable {
             onErrorId: tvm.functionId(onNftDeployError),
             signBoxHandle: _keyHandle
         }(_addrNFTRoot, 2 ton, true, 3, payload);
-
     }
     
     function onNftDeploySuccess() public {
@@ -213,16 +231,12 @@ contract NftDebot is Debot, Upgradable {
     function checkResult(
         address addrData,
         address addrRoot,
-        address addrOwner,
-        address addrTrusted,
-        string rarityName,
-        string url
+        address addrOwner
     ) public {
         Terminal.print(0, "Data of deployed NFT: ");
         Terminal.print(0, format("NFT address: {}", addrData));
+        Terminal.print(0, format("NFT root: {}", addrRoot));
         Terminal.print(0, format("NFT owner: {}", addrOwner));
-        Terminal.print(0, format("Rarity: {}\n", rarityName));
-        Terminal.print(0, format("Link: {}\n", url));
         restart();
     }
 
@@ -250,19 +264,19 @@ contract NftDebot is Debot, Upgradable {
     //     }();
     // }
 
-    function setNftAddr(TvmCell code, uint totalMinted) public {
-        tvm.accept();
-        TvmBuilder salt;
-        salt.store(_addrNFTRoot);
-        TvmCell newCodeData = tvm.setCodeSalt(code, salt.toCell());
-        TvmCell stateNftData = tvm.buildStateInit({
-            contr: Data,
-            varInit: {_id: totalMinted},
-            code: newCodeData
-        });
-        uint256 hashStateNftData = tvm.hash(stateNftData);
-        _addrNFT = address.makeAddrStd(0, hashStateNftData);
-    }
+    // function setNftAddr(TvmCell code, uint totalMinted) public {
+    //     tvm.accept();
+    //     TvmBuilder salt;
+    //     salt.store(_addrNFTRoot);
+    //     TvmCell newCodeData = tvm.setCodeSalt(code, salt.toCell());
+    //     TvmCell stateNftData = tvm.buildStateInit({
+    //         contr: Data,
+    //         varInit: {_id: totalMinted},
+    //         code: newCodeData
+    //     });
+    //     uint256 hashStateNftData = tvm.hash(stateNftData);
+    //     _addrNFT = address.makeAddrStd(0, hashStateNftData);
+    // }
 
     function attachNftRoot() public {
         AddressInput.get(tvm.functionId(saveRootAddr), "Attach NFTRoot.\n📋 Enter address:");
